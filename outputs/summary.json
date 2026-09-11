@@ -1,0 +1,49 @@
+{
+  "target": {
+    "bodyId": 10013,
+    "type": "MBON01",
+    "instance": "MBON01(y5B'2a)_R"
+  },
+  "unit_KCs": 664,
+  "unit_synapses": 15147,
+  "all_KC_MBON_edges": 61210,
+  "seeds": 30,
+  "blocks": 40,
+  "eta": 0.08,
+  "softmax_gain": 5,
+  "KC_active_fraction": 0.1,
+  "final_p_choose_A": {
+    "frozen": {
+      "mean": 0.5,
+      "std": 0.0,
+      "min": 0.5,
+      "max": 0.5
+    },
+    "no_reward": {
+      "mean": 0.5,
+      "std": 0.0,
+      "min": 0.5,
+      "max": 0.5
+    },
+    "nonselective_reward": {
+      "mean": 0.5001774097,
+      "std": 0.0008975512,
+      "min": 0.4979212748,
+      "max": 0.5014889862
+    },
+    "reward_A": {
+      "mean": 0.9870344671,
+      "std": 0.0027098993,
+      "min": 0.9805078613,
+      "max": 0.991479898
+    },
+    "reward_B": {
+      "mean": 0.0130098911,
+      "std": 0.0026333874,
+      "min": 0.0085388249,
+      "max": 0.019306622
+    }
+  },
+  "checks": "frozen/no-reward stay at 0.5; reward-label swap reverses preference; weights bounded; nonselective bias reported, not assumed zero",
+  "interpretation": "Model probabilities, not measured fly behavior. Synthetic KC inputs and imposed LTD/readout."
+}
