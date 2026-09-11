@@ -1,20 +1,20 @@
 # Male CNS — Learning & Neural Space
 
-雄ショウジョウバエのmale-cns:v1.0の実接続と実測神経骨格を使った、最小学習モデルとインタラクティブな3D可視化。
+A minimal associative learning model and interactive 3D visualizations built from real connectivity and reconstructed neuronal skeletons in the male Drosophila `male-cns:v1.0` dataset.
 
-## 可視化
+## Explore the visualizations
 
 ```sh
 python3 -m http.server 8000
 ```
 
-ブラウザで http://localhost:8000/outputs/neural-space.html を開くと、33ニューロンの3D形状を回転・拡大できる。PLAYで全664細胞の学習結果に同期して表示が変化する。Three.jsはCDNから読み込むためネットワーク接続が必要。
+Open http://localhost:8000/outputs/neural-space.html to rotate and zoom through 33 neuronal skeletons. Press **PLAY** to visualize changes synchronized with the learning results from all 664 modeled Kenyon cells. Three.js loads from a CDN, so the 3D viewer requires internet access.
 
 - [3D Neural Space](outputs/neural-space.html)
-- [細胞別の学習可視化](outputs/learning-interactive.html)
-- [学習モデルの仕様・結果・制約](outputs/README.md)
+- [Cell-level learning visualization](outputs/learning-interactive.html)
+- [Model details, results, and limitations](outputs/README.md)
 
-## 再実行
+## Reproduce the experiment
 
 ```sh
 python3 -m venv .venv
@@ -23,20 +23,20 @@ python -m pip install -r outputs/requirements.txt
 python outputs/run_learning.py
 ```
 
-抽出済み接続データを同梱しているため、約1.1GBの元接続表を再取得せず学習実験を再実行できる。可視化は実行時点の結果を埋め込んだスナップショットで、再実行結果へ自動更新されない。
+The extracted connectivity is included, so rerunning the experiment does not require downloading the approximately 1.1 GB source connectivity table. The visualizations contain embedded snapshots of the original results; they do not update automatically after rerunning the model.
 
-## 実データと演出
+## Recorded data and artistic interpretation
 
-- 学習：KCg-m 664細胞 → 右MBON01（body ID 10013）、15,147シナプス。
-- 3D：664細胞から32個のKCを抽出し、MBON01と合わせて33個の公式SWC骨格を表示。Aで活動する細胞からシナプス数上位12個、未選択のB活動細胞から上位12個、非活動細胞から上位8個を選択。
-- 形状は実測骨格の枝分かれと末端を保持して間引いたもの。元座標は8nm voxel単位。3D表示時に全体を中心化・等方スケーリング。
-- 刺激、可塑性、価値の読み出しは仮定。発光点の移動は演出であり、発火・伝導のシミュレーションではない。
-- 実際のハエの学習や行動を再現・検証したという主張ではない。この課題がmale-cns固有の配線を必要とすることも示していない。
+- **Learning model:** 664 KCg-m neurons connecting to the right MBON01 (body ID `10013`), representing 15,147 synapses.
+- **3D view:** 32 selected KCs and MBON01, using 33 official SWC skeletons. Selection takes the 12 strongest connections among A-active cells, the 12 strongest among remaining B-active cells, and the eight strongest among inactive cells.
+- Skeletons are simplified while retaining branch points and endpoints. Source coordinates use 8 nm voxels; the viewer centers and uniformly scales the geometry.
+- Stimuli, plasticity, and value readout are modeling assumptions. Moving light particles are an artistic effect, not a simulation of spikes or signal propagation.
+- This project does not establish that it reproduces learning or behavior in a real fly, or that this task requires the specific male-cns wiring.
 
-## 出典
+## Data attribution
 
-[MaleCNS公式データ](https://male-cns.janelia.org/download/) — FlyEM/Janelia、Cambridge/MRC LMB、Google Research。データはCC-BY。接続表の抽出・整形、骨格の間引き・可視化を行っている。元接続表のハッシュは `outputs/provenance.json` に記録。
+[Official MaleCNS data](https://male-cns.janelia.org/download/) — FlyEM/Janelia, Cambridge/MRC LMB, and Google Research. The data is distributed under CC-BY. This project extracts and reformats connectivity and simplifies neuronal skeletons for visualization. Source table hashes are recorded in `outputs/provenance.json`.
 
-骨格取得元：`https://storage.googleapis.com/flyem-male-cns/v1.0/segmentation/skeletons-malecns/skeletons-swc/{bodyId}.swc`
+Skeleton source: `https://storage.googleapis.com/flyem-male-cns/v1.0/segmentation/skeletons-malecns/skeletons-swc/{bodyId}.swc`
 
-`visualizations/` は編集用のインライン断片、`outputs/` は再実行コード・データ・結果・ブラウザ用の完成版。作業用環境と大容量の元データはGit管理対象外。
+`visualizations/` contains editable inline fragments. `outputs/` contains the experiment code, extracted data, results, and standalone browser views. Temporary environments and large source downloads are excluded from Git.

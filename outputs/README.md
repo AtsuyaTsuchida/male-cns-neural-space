@@ -1,32 +1,32 @@
-# male-cnsを使った最小学習実験
+# A Minimal Learning Experiment with male-cns
 
-## 結果
+## Results
 
-male-cns:v1.0の実接続を初期重みに使い、仮想刺激と報酬の対応を学ぶ簡略モデルを実行した。右側MBON01（bodyId 10013）へ接続するKCg-m 664細胞、合計15,147シナプスを使用した。これは脳全体のシミュレーションでも実際のハエの学習の検証でもない。
+This simplified model learns an association between synthetic stimuli and reward, using real `male-cns:v1.0` connectivity to initialize its weights. It includes 664 KCg-m neurons connecting to the right MBON01 (body ID `10013`), representing 15,147 synapses. It is neither a whole-brain simulation nor a validation of learning in real flies.
 
-40訓練ブロック後の「Aを選ぶモデル確率」（30乱数シードの平均）：
+Model probability of choosing A after 40 training blocks, averaged over 30 random seeds:
 
-| 条件 | Aを選ぶ確率 |
+| Condition | Probability of choosing A |
 |---|---:|
-| Aに報酬 | 98.70% |
-| Bに報酬 | 1.30% |
-| 報酬なし | 50.00% |
-| 可塑性なし | 50.00% |
-| A/Bに等しく報酬 | 50.02% |
+| Reward paired with A | 98.70% |
+| Reward paired with B | 1.30% |
+| No reward | 50.00% |
+| Plasticity disabled | 50.00% |
+| Equal reward for A and B | 50.02% |
 
-数値は人為的な学習率・読み出し係数に依存する。ハエの正答率を示さない。等報酬条件の小さな偏りは、共通の活動細胞への二重更新と、その接続重みの刺激間差から生じる。
+These values depend on the imposed learning rate and readout gain. They are not measured fly accuracy. The small bias under equal reward results from double updates to shared active cells and differences in their relative connection weights across stimuli.
 
-## 実データと仮定
+## Real data and assumptions
 
-- 実データ：公式v1.0、minconf 0.5の細胞注釈、KC→MBONの接続相手・シナプス数。全KC→MBONを抽出した61,210行も同梱。
-- 対象は事前にKCg-m→右MBON01へ固定し、学習結果の良い細胞を探索して選んでいない。
-- 初期重みはシナプス数を総和で割る。シナプス数が生理的強度と等しいという実証はない。
-- 刺激A/Bは各々約10%のKCを直接活動させる乱数パターン。実在の匂い、嗅覚受容体、PNの応答ではない。重なりを許す。
-- 報酬は外部から与えるスカラー。DAN細胞、報酬受容、スパイク、身体、回路内フィードバックは模擬していない。
-- 活動したKCの接続を報酬に応じて減衰させる。MBON01全体の区画別ドーパミン作用を再現していない。
-- 刺激ごとの学習前応答を参照して出力低下を価値へ変換する、人工的な読み出しを置く。実際のハエがこの正規化を行うという主張ではない。
+- **Real data:** official v1.0 annotations and KC-to-MBON partners and synapse counts, with a minimum confidence threshold of 0.5. The complete extracted KC-to-MBON table of 61,210 rows is included.
+- The modeled connection was fixed to KCg-m → right MBON01 before evaluating learning. Cells were not selected by searching for good learning performance.
+- Initial weights are synapse counts divided by their sum. This does not establish that synapse counts equal physiological connection strengths.
+- A and B are random patterns, each directly activating approximately 10% of KCs, with overlap allowed. They do not represent measured odors, olfactory receptor responses, or projection neuron responses.
+- Reward is an externally supplied scalar. Dopamine neuron dynamics, reward sensing, spikes, the body, and recurrent circuit feedback are not modeled.
+- Reward reduces the weights of active KC connections. This does not reproduce compartment-specific dopamine effects throughout MBON01.
+- An artificial readout converts output suppression into value relative to each stimulus's naive response. There is no claim that real flies perform this normalization.
 
-## 計算
+## Computation
 
 `w_i(0) = synapse_count_i / sum(synapse_count)`
 
@@ -36,32 +36,34 @@ male-cns:v1.0の実接続を初期重みに使い、仮想刺激と報酬の対�
 
 `P(A) = sigmoid(5 * (value(A)-value(B)))`
 
-1ブロックはAとBを1回ずつ提示。40ブロック、30シード。評価は重みを変更しない読み出しのみ。等報酬対照では両刺激に0.5ずつ報酬を与え、1ブロックの報酬総量を揃えた。報酬B条件は最初からBで訓練した独立実験であり、学習途中の逆転学習ではない。
+Each block presents A and B once. The experiment runs for 40 blocks across 30 seeds. Evaluation only reads the state and does not change weights. The equal-reward control supplies 0.5 reward for each stimulus, matching the total reward per block. The B-reward condition is an independent experiment trained with B from the start, not a reversal midway through learning.
 
-実接続を使っていても、この単純な課題は別の正の重みでも学べる。対照は学習ルールと報酬依存性の動作確認であり、male-cns固有の回路が必要だと示すものではない。実行した検証：無報酬・可塑性なしで50%維持、報酬対象変更で選好の向きが変化、重みが非負かつ初期値以下、接続ペア重複なし。実測行動との照合は未実施。
+This simple task can also be learned with other positive connection weights. The controls check the learning rule and reward dependence; they do not show that male-cns-specific wiring is necessary. Checks verify that no-reward and frozen-weight conditions remain at 50%, changing the rewarded stimulus reverses preference, weights remain nonnegative and no greater than their initial values, and connection pairs are unique. No comparison with measured behavior has been performed.
 
-## 再実行
+## Reproduction
 
-Python 3.12で検証。必要パッケージはnumpy、pandas、matplotlib（元データからの抽出時のみpyarrow）。同梱の抽出済みデータでオフライン再実行できる。
+Tested with Python 3.12. Dependencies are NumPy, pandas, and Matplotlib; PyArrow is needed only when extracting from the original data. With dependencies installed, the bundled extracted data supports offline reruns.
 
-```bash
+From this directory:
+
+```sh
 python -m pip install -r requirements.txt
 python run_learning.py
 ```
 
-この作業環境ではプロジェクトルートから `work/venv/bin/python outputs/run_learning.py`。
+Alternatively, from the repository root, run `python outputs/run_learning.py` using your configured Python environment.
 
-- `learning.png`：学習曲線（帯はシード間±1標準偏差）
-- `learning_results.csv`：全条件・全シードの数値
-- `learning_unit_edges.csv`：モデルに使った実接続
-- `kc_mbon_edges.csv.gz` / `neurons.csv`：抽出した全KC→MBON接続と注釈
-- `provenance.json`：元ファイルのSHA-256とサイズ
-- `summary.json`：結果と設定
+- `learning.png`: learning curves; shading is ±1 standard deviation across seeds.
+- `learning_results.csv`: results for every condition and seed.
+- `learning_unit_edges.csv`: real connections used by the model.
+- `kc_mbon_edges.csv.gz` / `neurons.csv`: all extracted KC-to-MBON connections and annotations.
+- `provenance.json`: SHA-256 hashes and sizes of source files.
+- `summary.json`: results and settings.
 
-元ファイルを再取得する場合、公式ダウンロードページの `body-annotations-male-cns-v1.0-minconf-0.5.feather` と `connectome-weights-male-cns-v1.0-minconf-0.5.feather` を作業ディレクトリに `annotations.feather`, `weights.feather` として保存し、抽出済み出力のないディレクトリで `--raw 作業ディレクトリ` を指定する。元接続表は約1.1GB。
+To repeat extraction, download `body-annotations-male-cns-v1.0-minconf-0.5.feather` and `connectome-weights-male-cns-v1.0-minconf-0.5.feather` from the official download page. Save them as `annotations.feather` and `weights.feather` in a working directory. Copy `run_learning.py` into a fresh output directory without the extracted files and run it with `--raw /path/to/working-directory`. The original connectivity table is approximately 1.1 GB.
 
-## 出典
+## Sources
 
-- [MaleCNS公式データ](https://male-cns.janelia.org/download/)：FlyEM/Janelia、Cambridge/MRC LMB、Google Research。CC-BY。配布物はKC→MBONに抽出・整形したもの。
-- [Hige et al., 2015, Coordinated and Compartmentalized Neuromodulation Shapes Sensory Processing in Drosophila](https://doi.org/10.1016/j.cell.2015.11.019)：区画ごとの可塑性の実験的背景。実装がこの論文を定量再現するわけではない。
-- [Learning with reinforcement prediction errors in a model of the Drosophila mushroom body](https://www.nature.com/articles/s41467-021-22592-4)：KC→MBON可塑性を用いるモデルの背景。本実装はこの論文のモデルを再実装したものではない。
+- [Official MaleCNS data](https://male-cns.janelia.org/download/): FlyEM/Janelia, Cambridge/MRC LMB, and Google Research. CC-BY. The bundled tables are extracted and reformatted KC-to-MBON data.
+- [Hige et al., 2015, Coordinated and Compartmentalized Neuromodulation Shapes Sensory Processing in Drosophila](https://doi.org/10.1016/j.cell.2015.11.019): experimental background for compartmentalized plasticity. This implementation does not quantitatively reproduce the paper.
+- [Learning with reinforcement prediction errors in a model of the Drosophila mushroom body](https://www.nature.com/articles/s41467-021-22592-4): background on models using KC-to-MBON plasticity. This implementation is not a reproduction of that model.
